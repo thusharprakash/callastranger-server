@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php
+require_once "phpagi.php";
+require_once "database.php";
+$agi = new AGI();
+$strPhone = "100017
+";
+$time = time();
+//$query = "SELECT * FROM 
+$times=1;
+while($times >=1)
+{
+	$exten = $agi->get_variable('EXTEN');
+	$caller = $agi->request['agi_callerid'];
+	$agi->set_callerid("Stranger". "<".$exten['data'].">");
+	$data['timestamp']=time();
+	$data['call_id']=$exten['data'];
+	$data['caller']=$caller;
+	$data['callee']=$strPhone;
+	$data['ip_caller'] = get_ip_from_extension($caller);
+	$data['ip_callee'] = get_ip_from_extension($strPhone);
+	$query=create_query($data,'call_log');
+        mysqli_query($con,$query);
+	$agi->exec("DIAL", "SIP/".$strPhone.",15,L(180000)");
+        $dial_status = $agi->get_variable('DIALSTATUS');
+	$data['call_status'] = $dial_status['data'];
+	file_put_contents ("/var/www/html/phone_app/log.txt",json_encode($dial_status)."\n",FILE_APPEND);
+	if($dial_status['data'] == "ANSWER")
+	{
+		die();
+	}
+	$times--;
+}
+
+?>

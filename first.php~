@@ -1,0 +1,28 @@
+<?php
+require_once 'database.php';
+if($_REQUEST['id']=="new")
+{
+
+	$prev_id = file_get_contents("last_inserted_name.txt");
+	$id = trim($prev_id)+1;
+	$query = "INSERT INTO `sip_devices` ( `name`,   `defaultuser`,  `host`, `type`, `context`, `permit`, `secret`,  `qualify`,  `call-limit`) VALUES (  '$id', 'dynamic', 'friend', 'from-internal', '0.0.0.0/0.0.0.0', '1234', '20000', '10000')";
+	mysqli_query($con,$query);
+	
+	if(mysqli_error($con)!=null)
+	{
+		echo mysqli_error($con);
+		$result['status']='error';
+		$id=$id-1;
+	}
+	else
+	{
+	
+		$result['status']='succes';
+		$result['ip']=$ip_address;
+		$result['secret']='1234';
+		$result['id']=$id;
+	}
+	file_put_contents("last_inserted_name.txt",$id);
+	echo json_encode($result);
+}
+?>
